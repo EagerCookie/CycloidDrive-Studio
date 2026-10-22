@@ -153,9 +153,9 @@ export class CanvasRenderer {
       this.drawPitchCircles(ctx, solution, carrier);
     }
 
-    // 2. Ролики статора (неподвижные) с визуализацией распределения нагрузки
+    // 2. Ролики статора (неподвижные) с динамической визуализацией распределения нагрузки
     if (this.layers.rollers && solution.rollers) {
-      this.drawStatorRollers(ctx, solution.rollers, stressAnalysis);
+      this.drawStatorRollers(ctx, solution.rollers, stressAnalysis, crankRad, solution);
     }
 
     // 3. Диск 2 (со сдвигом 180°), если включен
@@ -462,14 +462,35 @@ export class CanvasRenderer {
     ctx.stroke();
   }
 
-  drawStatorRollers(ctx, rollers, stressData = null) {
+  drawStatorRollers(ctx, rollers, stressData = null, crankRad = 0, solution = null) {
     ctx.save();
-    const hasStress = stressData && stressData.rollerForces && stressData.FmaxRoller > 0;
+    const hasStress = stressData && stressData.FmaxRoller > 0;
+    const Z2 = rollers.length;
+    const Z1 = solution ? solution.discTeeth : (Z2 - 1);
+    const E = solution ? solution.E : 1.5;
+    const Rp = E * Z1;
 
-    for (let j = 0; j < rollers.length; j++) {
+    // Мгновенный центр скоростей (Pitch point / ICV) для истинного направления линии действия сил контакта
+    const pitchX = Rp * Math.cos(crankRad);
+    const pitchY = Rp * Math.sin(crankRad);
+
+    for (let j = 0; j < Z2; j++) {
       const r = rollers[j];
-      const force = hasStress ? (stressData.rollerForces[j] || 0) : 0;
-      const loadRatio = hasStress ? (force / stressData.FmaxRoller) : 0;
+      const rollerAngle = Math.atan2(r.y, r.x);
+
+      // Динамический расчёт угла нагрузки относительно текущего угла эксцентрика
+      let loadRatio = 0;
+      let force = 0;
+
+      if (hasStress) {
+        // Угол ролика в системе координат эксцентрика
+        const psi = rollerAngle - crankRad;
+        const sinPsi = Math.sin(psi);
+        if (sinPsi > 0.001) {
+          loadRatio = sinPsi;
+          force = stressData.FmaxRoller * loadRatio;
+        }
+      }
 
       // Тело ролика
       if (hasStress && loadRatio > 0.05) {
@@ -495,19 +516,38 @@ export class CanvasRenderer {
       ctx.arc(r.x, r.y, 0.6 / this.scale, 0, Math.PI * 2);
       ctx.fill();
 
-      // Вектор силы контакта (стрелка), если ролик под значимой нагрузкой
-      if (hasStress && loadRatio > 0.15) {
-        const arrowLen = (r.radius * 0.9) * loadRatio;
-        const angleToCenter = Math.atan2(-r.y, -r.x); // вектор в сторону центра статора
-        const ax = r.x + Math.cos(angleToCenter) * arrowLen;
-        const ay = r.y + Math.sin(angleToCenter) * arrowLen;
+      // Вектор силы контакта со стрелкой, если ролик под значимой нагрузкой
+      if (hasStress && loadRatio > 0.12) {
+        // Направление нормали к зубу (линия от центра ролика к мгновенному центру зацепления)
+        const dirX = pitchX - r.x;
+        const dirY = pitchY - r.y;
+        const dirLen = Math.hypot(dirX, dirY) || 1;
+        const uX = dirX / dirLen;
+        const uY = dirY / dirLen;
+
+        const arrowLen = (r.radius * 0.95) * loadRatio;
+        const ax = r.x + uX * arrowLen;
+        const ay = r.y + uY * arrowLen;
 
         ctx.strokeStyle = "#f59e0b";
+        ctx.fillStyle = "#f59e0b";
         ctx.lineWidth = 1.6 / this.scale;
+
+        // Линия вектора
         ctx.beginPath();
         ctx.moveTo(r.x, r.y);
         ctx.lineTo(ax, ay);
         ctx.stroke();
+
+        // Стрелка на конце вектора
+        const headLen = Math.min(2.2 / this.scale, arrowLen * 0.4);
+        const arrowAngle = Math.atan2(uY, uX);
+        ctx.beginPath();
+        ctx.moveTo(ax, ay);
+        ctx.lineTo(ax - headLen * Math.cos(arrowAngle - Math.PI / 6), ay - headLen * Math.sin(arrowAngle - Math.PI / 6));
+        ctx.lineTo(ax - headLen * Math.cos(arrowAngle + Math.PI / 6), ay - headLen * Math.sin(arrowAngle + Math.PI / 6));
+        ctx.closePath();
+        ctx.fill();
       }
     }
     ctx.restore();
