@@ -20,7 +20,7 @@ export class CanvasRenderer {
     // Видимость слоев
     this.layers = {
       cam1: true,
-      cam2: true,
+      cam2: false,
       eccentric: true,
       rollers: true,
       carrier: true,

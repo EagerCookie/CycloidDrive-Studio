@@ -97,7 +97,7 @@ class CycloidApp {
       pinBearingPreset: "mr84",
       pinBearingId: 4.0,
       pinBearingOd: 8.0,
-      dualDisc: true,
+      dualDisc: false,
 
       // Архитектура редуктора ("standard" | "compound")
       driveType: "standard",
@@ -700,7 +700,18 @@ class CycloidApp {
 
     this.inputs.dualDisc.addEventListener("change", (e) => {
       this.params.dualDisc = e.target.checked;
-      this.render();
+      if (this.chkLayers.cam2) {
+        this.chkLayers.cam2.checked = e.target.checked;
+        this.renderer.layers.cam2 = e.target.checked;
+        if (this.chips.cam2) {
+          this.chips.cam2.classList.toggle("active", e.target.checked);
+        }
+      }
+      const dxfDisc2 = document.getElementById("dxf-inc-disc2");
+      if (dxfDisc2) {
+        dxfDisc2.checked = e.target.checked;
+      }
+      this.updateCalculations();
     });
 
     // Архитектура редуктора (Standard Carrier Pins vs Compound Cycloid)
@@ -994,6 +1005,14 @@ class CycloidApp {
         } else {
           this.chips[key].classList.remove("active");
         }
+        if (key === "cam2") {
+          this.params.dualDisc = e.target.checked;
+          if (this.inputs.dualDisc) this.inputs.dualDisc.checked = e.target.checked;
+          const dxfDisc2 = document.getElementById("dxf-inc-disc2");
+          if (dxfDisc2) dxfDisc2.checked = e.target.checked;
+          this.updateCalculations();
+          return;
+        }
         this.render();
       });
     });
@@ -1052,6 +1071,10 @@ class CycloidApp {
 
     // Экспорт DXF
     document.getElementById("btn-export-dxf").addEventListener("click", () => {
+      const dxfDisc2 = document.getElementById("dxf-inc-disc2");
+      if (dxfDisc2) {
+        dxfDisc2.checked = !!this.params.dualDisc;
+      }
       this.modalDxf.style.display = "flex";
     });
     document.getElementById("btn-close-dxf-modal").addEventListener("click", () => {
@@ -2041,8 +2064,20 @@ class CycloidApp {
       setCtrl(this.inputs.pinBearingOd, this.params.pinBearingOd, true);
     }
 
-    if (this.inputs.chkDualDisc && this.params.dualDisc !== undefined) {
-      this.inputs.chkDualDisc.checked = !!this.params.dualDisc;
+    const dualDiscInput = this.inputs.dualDisc || this.inputs.chkDualDisc;
+    if (dualDiscInput && this.params.dualDisc !== undefined) {
+      dualDiscInput.checked = !!this.params.dualDisc;
+      if (this.chkLayers.cam2) {
+        this.chkLayers.cam2.checked = !!this.params.dualDisc;
+        this.renderer.layers.cam2 = !!this.params.dualDisc;
+        if (this.chips.cam2) {
+          this.chips.cam2.classList.toggle("active", !!this.params.dualDisc);
+        }
+      }
+      const dxfDisc2 = document.getElementById("dxf-inc-disc2");
+      if (dxfDisc2) {
+        dxfDisc2.checked = !!this.params.dualDisc;
+      }
     }
 
     // Архитектура редуктора и параметры Compound
