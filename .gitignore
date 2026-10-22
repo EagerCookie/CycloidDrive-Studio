@@ -1,0 +1,22 @@
+# Operating System Files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editors and IDEs
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Python cache (local server)
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Temporary and backup files
+*.tmp
+*.bak
+*.swp
+*~
+*.log
