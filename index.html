@@ -1,0 +1,1271 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CycloidDrive Studio — Проектирование и симуляция циклоидного редуктора</title>
+  <meta name="description" content="Интерактивный веб-инженерный калькулятор и симулятор циклоидных редукторов (Cycloidal Drive) с экспортом в DXF и SVG.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Верхняя панель -->
+    <header class="app-header">
+      <div class="header-brand">
+        <div class="brand-icon">
+          <svg viewBox="0 0 32 32" width="28" height="28" fill="none">
+            <circle cx="16" cy="16" r="14" stroke="#00f2fe" stroke-width="2" stroke-dasharray="3 3"/>
+            <circle cx="18" cy="16" r="9" stroke="#4facfe" stroke-width="2.5"/>
+            <circle cx="18" cy="16" r="3.5" fill="#00f2fe"/>
+            <circle cx="16" cy="6" r="2" fill="#38ef7d"/>
+            <circle cx="26" cy="16" r="2" fill="#38ef7d"/>
+            <circle cx="16" cy="26" r="2" fill="#38ef7d"/>
+            <circle cx="6" cy="16" r="2" fill="#38ef7d"/>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1>CycloidDrive <span>Studio</span></h1>
+          <p class="subtitle">Инженерный калькулятор & кинематический симулятор</p>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <div class="preset-selector-wrapper">
+          <label for="preset-select">Пресет:</label>
+          <select id="preset-select" class="form-select">
+            <optgroup label="Встроенные пресеты (Классические)" id="optgroup-builtin-presets">
+              <option value="standard-10">Стандартный (10:1, Z=10)</option>
+              <option value="compact-15">3D-печать Компакт (15:1, Z=15)</option>
+              <option value="robotics-29">Робототехнический привод (29:1, Z=29)</option>
+              <option value="high-torque-41">Высокомоментный (41:1, Z=41)</option>
+              <option value="zincland-default">Zincland Classic (9:1, Z=9)</option>
+            </optgroup>
+            <optgroup label="Двухвенцовые (Compound Cycloid)" id="optgroup-compound-presets">
+              <option value="compound-121">Compound 121:1 (Z1=11, Z2=10)</option>
+              <option value="compound-225">Compound 225:1 (Z1=15, Z2=14)</option>
+              <option value="compound-81">Compound 81:1 (Z1=9, Z2=8)</option>
+              <option value="compound-361">Compound 361:1 (Z1=19, Z2=18)</option>
+            </optgroup>
+            <optgroup label="Мои сохранённые проекты" id="optgroup-custom-presets">
+            </optgroup>
+          </select>
+          <button id="btn-save-custom-preset" class="btn-icon-subtle" title="Сохранить текущие параметры как пресет в браузере">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+          </button>
+        </div>
+
+        <div class="btn-group-project">
+          <input type="file" id="file-input-json" accept=".json" style="display: none;">
+          <button id="btn-import-json" class="btn btn-secondary" title="Загрузить проект из файла JSON (или перетащите файл на экран)">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            Загрузить JSON
+          </button>
+
+          <button id="btn-export-json" class="btn btn-secondary" title="Сохранить текущую конфигурацию в файл JSON">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Сохранить JSON
+          </button>
+        </div>
+
+        <button id="btn-export-dxf" class="btn btn-primary" title="Экспорт контура диска и пальцев в AutoCAD DXF">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+          Экспорт DXF
+        </button>
+
+        <button id="btn-export-svg" class="btn btn-secondary" title="Экспорт векторного рисунка SVG">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+          SVG
+        </button>
+      </div>
+    </header>
+
+    <!-- Основное рабочее пространство -->
+    <main class="app-workspace">
+      <!-- Левая панель параметров -->
+      <aside class="sidebar-panel">
+        <!-- Переключатель схемы редуктора -->
+        <div class="arch-toggle-box">
+          <div class="arch-title">Схема редуктора:</div>
+          <div class="arch-toggle-group">
+            <button type="button" class="arch-toggle-btn active" id="btn-arch-standard" data-arch="standard" title="Классический циклоидный редуктор с пальцами водила">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/><circle cx="12" cy="6" r="1.5" fill="currentColor"/><circle cx="17.2" cy="9" r="1.5" fill="currentColor"/><circle cx="17.2" cy="15" r="1.5" fill="currentColor"/><circle cx="12" cy="18" r="1.5" fill="currentColor"/><circle cx="6.8" cy="15" r="1.5" fill="currentColor"/><circle cx="6.8" cy="9" r="1.5" fill="currentColor"/></svg>
+              <span>Пальцы водила</span>
+            </button>
+            <button type="button" class="arch-toggle-btn" id="btn-arch-compound" data-arch="compound" title="Двухвенцовый безпальцевый редуктор со сверхвысокой редукцией">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" stroke-dasharray="2 2"/><circle cx="12" cy="12" r="6"/><circle cx="13" cy="12" r="2.5" fill="currentColor"/></svg>
+              <span>Compound (2 венца)</span>
+              <span class="arch-badge-mini" id="badge-arch-ratio">121:1</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Вкладки решателей и настроек -->
+        <div class="tabs-nav">
+          <button class="tab-btn active" data-tab="tab-params">Параметры</button>
+          <button class="tab-btn" data-tab="tab-eccentric">Вал и эксцентрик</button>
+          <button class="tab-btn" data-tab="tab-carrier" id="tab-btn-carrier">Выходной вал</button>
+          <button class="tab-btn" data-tab="tab-analysis">Анализ</button>
+        </div>
+
+        <!-- Содержимое вкладки: Параметры профиля -->
+        <div class="tab-content active" id="tab-params">
+          <div class="param-group">
+            <div class="group-title">
+              <span>Метод построения (Solver)</span>
+            </div>
+            <div class="form-group">
+              <select id="param-solver" class="form-select full-width">
+                <option value="sensinger" selected>Sensinger (Оптимизированный профиль)</option>
+                <option value="zincland">Zincland Classic (Оригинал hypocycloid)</option>
+                <option value="epitrochoid">Классическая эпитрохоида с эквидистантой</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="param-group">
+            <div class="group-title">
+              <span>Геометрия зубьев и роликов</span>
+              <span class="badge" id="badge-ratio">i = 10:1</span>
+            </div>
+
+            <!-- Число зубьев диска Z1 -->
+            <div class="param-row">
+              <div class="param-label">
+                <label for="inp-z1">Число зубьев диска (Z₁):</label>
+                <span class="param-val" id="val-z1">10</span>
+              </div>
+              <div class="param-control">
+                <input type="range" id="inp-z1" min="4" max="60" step="1" value="10">
+                <input type="number" id="num-z1" min="4" max="60" step="1" value="10" class="num-box">
+              </div>
+              <div class="param-hint">Роликов в корпусе: <strong id="hint-z2">11</strong> (Z₂ = Z₁ + 1)</div>
+            </div>
+
+            <!-- Радиус расположения роликов R -->
+            <div class="param-row">
+              <div class="param-label">
+                <label for="inp-r">Радиус венца роликов R (мм):</label>
+                <span class="param-val" id="val-r">30.00</span>
+              </div>
+              <div class="param-control">
+                <input type="range" id="inp-r" min="10" max="150" step="0.5" value="30">
+                <input type="number" id="num-r" min="10" max="150" step="0.5" value="30" class="num-box">
+              </div>
+              <div class="param-hint">Делительный радиус центров роликов статора</div>
+            </div>
+
+            <!-- Радиус ролика Rr -->
+            <div class="param-row">
+              <div class="param-label">
+                <label for="inp-rr">Радиус ролика Rᵣ (мм):</label>
+                <span class="param-val" id="val-rr">3.00</span>
+              </div>
+              <div class="param-control">
+                <input type="range" id="inp-rr" min="0.5" max="25" step="0.1" value="3.0">
+                <input type="number" id="num-rr" min="0.5" max="25" step="0.1" value="3.0" class="num-box">
+              </div>
+              <div class="param-hint">Диаметр ролика: <strong id="hint-dr">6.0</strong> мм</div>
+            </div>
+
+            <!-- Эксцентриситет E -->
+            <div class="param-row">
+              <div class="param-label">
+                <label for="inp-e">Эксцентриситет e (мм):</label>
+                <span class="param-val" id="val-e">1.50</span>
+              </div>
+              <div class="param-control">
+                <input type="range" id="inp-e" min="0.1" max="10" step="0.05" value="1.5">
+                <input type="number" id="num-e" min="0.1" max="10" step="0.05" value="1.5" class="num-box">
+              </div>
+              <div class="param-hint">Смещение оси вращения эксцентрика</div>
+            </div>
+
+            <!-- Зазор/модификация профиля delta -->
+            <div class="param-row">
+              <div class="param-label">
+                <label for="inp-clearance">Технологический зазор (мм):</label>
+                <span class="param-val" id="val-clearance">0.05</span>
+              </div>
+              <div class="param-control">
+                <input type="range" id="inp-clearance" min="0" max="0.5" step="0.01" value="0.05">
+                <input type="number" id="num-clearance" min="0" max="0.5" step="0.01" value="0.05" class="num-box">
+              </div>
+              <div class="param-hint">Эквидистантный сдвиг профиля для посадки / 3D-печати</div>
+            </div>
+
+            <!-- Центральное отверстие Cam Hole Diameter -->
+            <div class="param-row">
+              <div class="param-label">
+                <label for="inp-cam-bore">Отверстие под подшипник (мм):</label>
+                <span class="param-val" id="val-cam-bore">22.00</span>
+              </div>
+              <div class="param-control">
+                <input type="range" id="inp-cam-bore" min="5" max="80" step="0.5" value="22">
+                <input type="number" id="num-cam-bore" min="5" max="80" step="0.5" value="22" class="num-box">
+              </div>
+            </div>
+
+            <!-- Точность дискретизации N points -->
+            <div class="param-row">
+              <div class="param-label">
+                <label for="inp-steps">Количество точек контура:</label>
+                <span class="param-val" id="val-steps">1200</span>
+              </div>
+              <div class="param-control">
+                <input type="range" id="inp-steps" min="360" max="3600" step="120" value="1200">
+                <input type="number" id="num-steps" min="360" max="3600" step="120" value="1200" class="num-box">
+              </div>
+            </div>
+          </div>
+
+          <!-- Группа: Модификации профиля под 3D-печать (Tip & Root Relief) -->
+          <div class="param-group">
+            <div class="group-title" style="display: flex; justify-content: space-between; align-items: center;">
+              <span>Модификации под 3D-печать (Relief)</span>
+              <label class="custom-checkbox" style="font-size: 0.72rem; text-transform: none; font-weight: 500;">
+                <input type="checkbox" id="chk-use-relief">
+                <span class="checkbox-box" style="width: 14px; height: 14px;"></span>
+                <span class="checkbox-label" style="font-size: 0.74rem;">Включить</span>
+              </label>
+            </div>
+
+            <div id="relief-controls-box" style="display: none; margin-top: 10px;">
+              <!-- Притупление вершин h_tip -->
+              <div class="param-row">
+                <div class="param-label">
+                  <label for="inp-tip-relief">Срез вершины h_tip (мм):</label>
+                  <span class="param-val" id="val-tip-relief">0.20</span>
+                </div>
+                <div class="param-control">
+                  <input type="range" id="inp-tip-relief" min="0.0" max="1.5" step="0.05" value="0.2">
+                  <input type="number" id="num-tip-relief" min="0.0" max="1.5" step="0.05" value="0.2" class="num-box">
+                </div>
+                <div class="param-hint">Устраняет наплывы пластика и заедания на вершинах</div>
+              </div>
+
+              <!-- Зазор во впадинах h_root -->
+              <div class="param-row">
+                <div class="param-label">
+                  <label for="inp-root-relief">Зазор впадины h_root (мм):</label>
+                  <span class="param-val" id="val-root-relief">0.10</span>
+                </div>
+                <div class="param-control">
+                  <input type="range" id="inp-root-relief" min="0.0" max="1.0" step="0.05" value="0.1">
+                  <input type="number" id="num-root-relief" min="0.0" max="1.0" step="0.05" value="0.1" class="num-box">
+                </div>
+                <div class="param-hint">Исключает утыкание роликов статора в дно впадин</div>
+              </div>
+
+              <!-- Тип скругления вершины -->
+              <div class="form-group" style="margin-top: 8px;">
+                <label for="sel-tip-mode" style="font-size: 0.76rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Форма среза вершины:</label>
+                <select id="sel-tip-mode" class="form-select full-width" style="font-size: 0.8rem; padding: 5px 8px;">
+                  <option value="truncate" selected>Площадка (Crest Truncation, цилиндрический срез)</option>
+                  <option value="smooth">Плавное скругление (Hermite Smoothstep C1)</option>
+                </select>
+              </div>
+
+              <!-- Информационная плашка профиля -->
+              <div class="param-hint" id="relief-status-hint" style="margin-top: 8px; color: var(--accent-cyan); font-size: 0.74rem; background: rgba(0, 242, 254, 0.08); padding: 6px 10px; border-radius: var(--radius-sm); border: 1px solid rgba(0, 242, 254, 0.2);">
+                Высота зуба H: <strong id="val-tooth-height">3.00 мм</strong> (R_max: <span id="val-rmax-relieved">27.30 мм</span>)
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Содержимое вкладки: Вал и эксцентрик (Кулачок) -->
+        <div class="tab-content" id="tab-eccentric">
+          <div class="param-group">
+            <div class="group-title">
+              <span>Вал двигателя (Input Shaft)</span>
+            </div>
+            
+            <div class="form-group" style="margin-bottom: 12px;">
+              <label for="sel-motor-preset" style="font-size: 0.8rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Тип двигателя / вала:</label>
+              <select id="sel-motor-preset" class="form-select full-width">
+                <option value="nema17-d" selected>NEMA 17 (Вал 5.0 мм со срезом D-cut)</option>
+                <option value="nema17-round">Вал 5.0 мм круглый</option>
+                <option value="nema23-d">NEMA 23 (Вал 8.0 мм со срезом D-cut)</option>
+                <option value="nema23-round">Вал 8.0 мм круглый</option>
+                <option value="quarter-inch">Вал 1/4" (6.35 мм)</option>
+                <option value="shaft-4">Вал 4.0 мм круглый</option>
+                <option value="custom">Пользовательский размер</option>
+              </select>
+            </div>
+
+            <!-- Диаметр вала двигателя -->
+            <div class="param-row">
+              <div class="param-label">
+                <label for="inp-shaft-d">Диаметр вала двигателя D_вала (мм):</label>
+                <span class="param-val" id="val-shaft-d">5.00</span>
+              </div>
+              <div class="param-control">
+                <input type="range" id="inp-shaft-d" min="2" max="15" step="0.5" value="5">
+                <input type="number" id="num-shaft-d" min="2" max="15" step="0.5" value="5" class="num-box">
+              </div>
+            </div>
+
+            <div class="checkbox-row" style="margin-top: 10px;">
+              <label class="custom-checkbox">
+                <input type="checkbox" id="chk-shaft-dcut" checked>
+                <span class="checkbox-box"></span>
+                <span class="checkbox-label">Плоский срез вала (D-cut)</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="param-group">
+            <div class="group-title">
+              <span>Подшипник эксцентрика (Bearing)</span>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 12px;">
+              <label for="sel-bearing-preset" style="font-size: 0.8rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Типоразмер подшипника:</label>
+              <select id="sel-bearing-preset" class="form-select full-width">
+                <option value="6801" selected>6801 (12 × 21 × 5 мм) [Рекомендуется]</option>
+                <option value="6802">6802 (15 × 24 × 5 мм) [Высокая прочность]</option>
+                <option value="6803">6803 (17 × 26 × 5 мм) [Универсальный]</option>
+                <option value="6804">6804 (20 × 32 × 7 мм) [Для мощных валов]</option>
+                <option value="6800">6800 (10 × 19 × 5 мм) [Компактный]</option>
+                <option value="6900">6900 (10 × 22 × 6 мм) [Усиленный]</option>
+                <option value="608">608-RS (8 × 22 × 7 мм) [Скейт-подшипник]</option>
+                <option value="custom">Пользовательский (ручной ввод)</option>
+              </select>
+            </div>
+
+            <!-- Внутренний диаметр подшипника d_inner -->
+            <div class="param-row">
+              <div class="param-label">
+                <label for="inp-bearing-id">Внутренний диаметр d_внутр (мм):</label>
+                <span class="param-val" id="val-bearing-id">12.00</span>
+              </div>
+              <div class="param-control">
+                <input type="range" id="inp-bearing-id" min="5" max="35" step="0.5" value="12">
+                <input type="number" id="num-bearing-id" min="5" max="35" step="0.5" value="12" class="num-box">
+              </div>
+              <div class="param-hint">Посадочный диаметр внешней шейки эксцентрика</div>
+            </div>
+
+            <!-- Внешний диаметр подшипника D_outer -->
+            <div class="param-row">
+              <div class="param-label">
+                <label for="inp-bearing-od">Внешний диаметр D_внеш (мм):</label>
+                <span class="param-val" id="val-bearing-od">21.00</span>
+              </div>
+              <div class="param-control">
+                <input type="range" id="inp-bearing-od" min="10" max="60" step="0.5" value="21">
+                <input type="number" id="num-bearing-od" min="10" max="60" step="0.5" value="21" class="num-box">
+              </div>
+              <div class="param-hint">Диаметр отверстия под подшипник в циклоидном диске</div>
+            </div>
+          </div>
+
+          <!-- Оценка надежности для 3D-печати -->
+          <div class="param-group">
+            <div class="group-title">
+              <span>Оценка прочности для 3D-печати</span>
+            </div>
+
+            <div id="eccentric-wall-card" class="status-card status-ok">
+              <div class="status-indicator"></div>
+              <div class="status-details">
+                <div class="status-heading" id="eccentric-wall-title">Толщина стенки: 2.00 мм</div>
+                <div class="status-sub" id="eccentric-wall-desc">Надёжно для 3D-печати (t_min ≥ 1.5 мм).</div>
+              </div>
+            </div>
+
+            <div class="info-card">
+              <div class="info-title">Формула минимальной стенки кулачка:</div>
+              <div class="info-formula">t<sub>min</sub> = (d<sub>внутр</sub> - D<sub>вала</sub>) / 2 - e</div>
+              <div class="info-desc" style="margin-top: 6px;">
+                В месте максимального смещения кулачка пластик истончается. При t<sub>min</sub> &lt; 1.5 мм деталь может лопнуть при монтаже или под нагрузкой.
+              </div>
+            </div>
+
+            <button id="btn-export-cam-dxf" class="btn btn-secondary full-width" style="margin-top: 14px; justify-content: center;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+              Скачать 2D-чертёж эксцентрика (DXF)
+            </button>
+          </div>
+        </div>
+
+        <!-- Содержимое вкладки: Выходной механизм (пальцы и отверстия) -->
+        <div class="tab-content" id="tab-carrier">
+          <!-- СТАНДАРТНАЯ СХЕМА: Пальцы водила -->
+          <div id="carrier-standard-container">
+            <div class="param-group">
+              <div class="group-title">
+                <span>Пальцевая муфта вывода (Carrier)</span>
+              </div>
+              <p class="section-desc">Передаёт вращение циклоидного диска на выходной вал без эксцентриситета.</p>
+
+              <div class="param-row">
+                <div class="param-label">
+                  <label for="inp-carrier-n">Количество выходных пальцев:</label>
+                  <span class="param-val" id="val-carrier-n">6</span>
+                </div>
+                <div class="param-control">
+                  <input type="range" id="inp-carrier-n" min="3" max="12" step="1" value="6">
+                  <input type="number" id="num-carrier-n" min="3" max="12" step="1" value="6" class="num-box">
+                </div>
+              </div>
+
+              <div class="param-row">
+                <div class="param-label">
+                  <label for="inp-carrier-r">Радиус расположения пальцев (мм):</label>
+                  <span class="param-val" id="val-carrier-r">17.00</span>
+                </div>
+                <div class="param-control">
+                  <input type="range" id="inp-carrier-r" min="5" max="80" step="0.5" value="17">
+                  <input type="number" id="num-carrier-r" min="5" max="80" step="0.5" value="17" class="num-box">
+                </div>
+              </div>
+
+              <!-- Режим использования подшипников на пальцах -->
+              <div class="checkbox-row" style="margin-bottom: 12px;">
+                <label class="custom-checkbox">
+                  <input type="checkbox" id="chk-pin-bearing" checked>
+                  <span class="checkbox-box"></span>
+                  <span class="checkbox-label"><strong>Подшипники на пальцах (трение качения)</strong></span>
+                </label>
+              </div>
+
+              <!-- Блок подбора по подшипнику пальца -->
+              <div id="pin-bearing-controls" style="background: rgba(0,0,0,0.2); padding: 12px; border-radius: var(--radius-sm); margin-bottom: 14px; border: 1px solid var(--border-subtle);">
+                <div class="form-group" style="margin-bottom: 10px;">
+                  <label for="sel-pin-bearing" style="font-size: 0.8rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Типоразмер подшипника пальца:</label>
+                  <select id="sel-pin-bearing" class="form-select full-width">
+                    <option value="mr74">MR74-ZZ (4 × 7 × 2.5 мм) — под винт M4</option>
+                    <option value="mr84" selected>MR84-ZZ (4 × 8 × 3.0 мм) — оптимальный под M4</option>
+                    <option value="mr85">MR85-ZZ (5 × 8 × 2.5 мм) — под винт M5</option>
+                    <option value="mr95">MR95-ZZ (5 × 9 × 3.0 мм) — популярный под M5</option>
+                    <option value="mr105">MR105-ZZ (5 × 10 × 4.0 мм) — усиленный</option>
+                    <option value="mr63">MR63-ZZ (3 × 6 × 2.5 мм) — компактный под M3</option>
+                    <option value="mr106">MR106-ZZ (6 × 10 × 3.0 мм) — под штифт 6 мм</option>
+                    <option value="693">693-ZZ (3 × 8 × 4.0 мм)</option>
+                    <option value="694">694-ZZ (4 × 11 × 4.0 мм)</option>
+                    <option value="695">695-ZZ (5 × 13 × 4.0 мм)</option>
+                    <option value="custom">Пользовательский (ручной ввод)</option>
+                  </select>
+                </div>
+
+                <!-- Внутренний диаметр подшипника пальца d_inner (диаметр пальца) -->
+                <div class="param-row">
+                  <div class="param-label">
+                    <label for="inp-pin-b-id">Диаметр пальца d_внутр (мм):</label>
+                    <span class="param-val" id="val-pin-b-id">4.00</span>
+                  </div>
+                  <div class="param-control">
+                    <input type="range" id="inp-pin-b-id" min="2" max="12" step="0.5" value="4">
+                    <input type="number" id="num-pin-b-id" min="2" max="12" step="0.5" value="4" class="num-box">
+                  </div>
+                  <div class="param-hint">Диаметр металлического штифта / винта (посадка подшипника)</div>
+                </div>
+
+                <!-- Внешний диаметр подшипника пальца D_outer -->
+                <div class="param-row">
+                  <div class="param-label">
+                    <label for="inp-pin-b-od">Внешний диаметр подшипника D_внеш (мм):</label>
+                    <span class="param-val" id="val-pin-b-od">8.00</span>
+                  </div>
+                  <div class="param-control">
+                    <input type="range" id="inp-pin-b-od" min="5" max="25" step="0.5" value="8">
+                    <input type="number" id="num-pin-b-od" min="5" max="25" step="0.5" value="8" class="num-box">
+                  </div>
+                  <div class="param-hint">Ролик, который обкатывается внутри отверстия диска</div>
+                </div>
+              </div>
+
+              <!-- Блок прямого ввода диаметра пальца (когда без подшипников) -->
+              <div id="pin-direct-controls" style="display: none;">
+                <div class="param-row">
+                  <div class="param-label">
+                    <label for="inp-carrier-pin-d">Диаметр пальца скольжения (мм):</label>
+                    <span class="param-val" id="val-carrier-pin-d">5.00</span>
+                  </div>
+                  <div class="param-control">
+                    <input type="range" id="inp-carrier-pin-d" min="2" max="25" step="0.5" value="5">
+                    <input type="number" id="num-carrier-pin-d" min="2" max="25" step="0.5" value="5" class="num-box">
+                  </div>
+                </div>
+              </div>
+
+              <!-- Результат расчета отверстия и рекомендации -->
+              <div class="info-card">
+                <div class="info-title">Расчётное отверстие в диске:</div>
+                <div class="info-value" id="info-hole-calc">D_отв = 11.00 мм</div>
+                <div class="info-formula" id="info-hole-formula">D<sub>отв</sub> = D<sub>подшипника</sub> + 2 · e</div>
+                <div class="param-hint" id="info-max-bearing-hint" style="margin-top: 6px; color: var(--accent-cyan);">
+                  Макс. размер подшипника для стенок ≥ 1.8 мм: <strong>D_внеш ≤ 10.5 мм</strong>
+                </div>
+              </div>
+            </div>
+
+            <!-- Контроль толщины стенок диска вокруг отверстий -->
+            <div class="param-group">
+              <div class="group-title">
+                <span>Толщина стенок диска (3D-печать)</span>
+              </div>
+
+              <div id="carrier-wall-card" class="status-card status-ok">
+                <div class="status-indicator"></div>
+                <div class="status-details">
+                  <div class="status-heading" id="carrier-wall-title">Стенки диска: Надёжно</div>
+                  <div class="status-sub" id="carrier-wall-desc">Отверстия достаточно удалены от подшипника и впадин зубьев.</div>
+                </div>
+              </div>
+
+              <div class="metric-grid-3">
+                <div class="metric-item">
+                  <span class="metric-name">К подшипнику (t_внутр)</span>
+                  <span class="metric-val" id="m-wall-inner">2.50 мм</span>
+                  <span class="metric-sub">Лимит: ≥ 1.5 мм</span>
+                </div>
+                <div class="metric-item">
+                  <span class="metric-name">К зубьям (t_внеш)</span>
+                  <span class="metric-val" id="m-wall-outer">4.20 мм</span>
+                  <span class="metric-sub">Лимит: ≥ 1.5 мм</span>
+                </div>
+                <div class="metric-item">
+                  <span class="metric-name">Перемычка (t_межосев)</span>
+                  <span class="metric-val" id="m-wall-inter">3.80 мм</span>
+                  <span class="metric-sub">Лимит: ≥ 1.5 мм</span>
+                </div>
+              </div>
+
+              <div class="info-card">
+                <div class="info-desc">
+                  Для передачи крутящего момента перемычки вокруг отверстий должны иметь не менее <strong>4–5 периметров сопла</strong> (1.6–2.0 мм). Если стенка истончается, скорректируйте радиус расположения отверстий <em>R</em> или уменьшите диаметр пальца.
+                </div>
+              </div>
+            </div>
+
+            <div class="param-group">
+              <div class="group-title">
+                <span>Двухдисковая балансировка</span>
+              </div>
+              <div class="checkbox-row">
+                <label class="custom-checkbox">
+                  <input type="checkbox" id="chk-dual-disc" checked>
+                  <span class="checkbox-box"></span>
+                  <span class="checkbox-label">Второй диск (со сдвигом фазы 180°)</span>
+                </label>
+              </div>
+              <div class="param-hint">В реальных редукторах всегда используют 2 диска в противофазе для взаимной компенсации центробежных сил и вибраций.</div>
+            </div>
+          </div>
+
+          <!-- СХЕМА COMPOUND: Второй венец и кольцо выхода -->
+          <div id="carrier-compound-container" style="display: none;">
+            <!-- Карточка передаточного отношения Compound -->
+            <div class="compound-ratio-card">
+              <div class="compound-ratio-header">
+                <div>
+                  <span style="font-size:0.75rem; text-transform:uppercase; color:var(--text-muted); font-weight:600; display:block;">Редукция Compound:</span>
+                  <span class="compound-ratio-val" id="val-compound-ratio">121:1</span>
+                </div>
+                <span class="compound-dir-badge compound-dir-same" id="val-compound-dir">Соосное с мотором</span>
+              </div>
+              <div class="compound-formula-box" id="val-compound-formula">i = (11 × 11) / (11×11 − 12×10) = +121.00</div>
+              <p style="font-size:0.74rem; color:var(--text-muted); margin-top:8px; line-height:1.4;">
+                Выходной крутящий момент передаётся напрямую на внешнее кольцо роликов. Пальцы водила не требуются!
+              </p>
+            </div>
+
+            <!-- Геометрия Венца 2 (Stage 2) -->
+            <div class="param-group">
+              <div class="group-title">
+                <span>Геометрия Венца 2 (Stage 2)</span>
+              </div>
+
+              <!-- Зубьев венца 2 (Z2) -->
+              <div class="param-row">
+                <div class="param-label">
+                  <label for="inp-z2">Зубьев второго венца (Z₂):</label>
+                  <span class="param-val" id="val-z2">10</span>
+                </div>
+                <div class="param-control">
+                  <input type="range" id="inp-z2" min="4" max="60" step="1" value="10">
+                  <input type="number" id="num-z2" min="4" max="60" step="1" value="10" class="num-box">
+                </div>
+                <div class="quick-buttons-row">
+                  <button type="button" class="btn-quick-tag" id="btn-quick-z2-minus" title="Рекомендуется для положительного сверхвысокого передаточного числа">Z₂ = Z₁ − 1 (Соосное)</button>
+                  <button type="button" class="btn-quick-tag" id="btn-quick-z2-plus" title="Реверсивное вращение выхода">Z₂ = Z₁ + 1 (Реверс)</button>
+                </div>
+              </div>
+
+              <!-- Роликов на выходном кольце (Z_out) -->
+              <div class="param-row" style="margin-top: 14px;">
+                <div class="param-label">
+                  <label for="sel-zout-mode">Роликов в кольце выхода (Z_вых):</label>
+                  <span class="param-val" id="val-zout">11</span>
+                </div>
+                <div class="form-group" style="margin-bottom: 6px;">
+                  <select id="sel-zout-mode" class="form-select full-width">
+                    <option value="plus_1" selected>Z₂ + 1 (Соосное вращение, Z_вых = 11) [Рекомендуется]</option>
+                    <option value="minus_1">Z₂ − 1 (Реверс, Z_вых = 9)</option>
+                    <option value="custom">Пользовательское количество</option>
+                  </select>
+                </div>
+                <div id="row-custom-zout" style="display: none; margin-top: 6px;">
+                  <div class="param-control">
+                    <input type="range" id="inp-zout" min="4" max="70" step="1" value="11">
+                    <input type="number" id="num-zout" min="4" max="70" step="1" value="11" class="num-box">
+                  </div>
+                </div>
+              </div>
+
+              <!-- Радиус венца роликов выхода R2 -->
+              <div class="param-row">
+                <div class="param-label">
+                  <label for="inp-r2">Радиус роликов выхода R₂ (мм):</label>
+                  <span class="param-val" id="val-r2">28.00</span>
+                </div>
+                <div class="param-control">
+                  <input type="range" id="inp-r2" min="10" max="150" step="0.5" value="28">
+                  <input type="number" id="num-r2" min="10" max="150" step="0.5" value="28" class="num-box">
+                </div>
+                <div class="param-hint">Делительный радиус роликов подвижного выходного кольца</div>
+              </div>
+
+              <!-- Радиус ролика выхода Rr2 -->
+              <div class="param-row">
+                <div class="param-label">
+                  <label for="inp-rr2">Радиус ролика выхода Rᵣ₂ (мм):</label>
+                  <span class="param-val" id="val-rr2">2.50</span>
+                </div>
+                <div class="param-control">
+                  <input type="range" id="inp-rr2" min="0.5" max="25" step="0.1" value="2.5">
+                  <input type="number" id="num-rr2" min="0.5" max="25" step="0.1" value="2.5" class="num-box">
+                </div>
+                <div class="param-hint">Диаметр ролика выхода: <strong id="hint-dr2">5.0</strong> мм</div>
+              </div>
+
+              <!-- Зазор профиля венца 2 -->
+              <div class="param-row">
+                <div class="param-label">
+                  <label for="inp-clearance2">Зазор венца 2 (мм):</label>
+                  <span class="param-val" id="val-clearance2">0.05</span>
+                </div>
+                <div class="param-control">
+                  <input type="range" id="inp-clearance2" min="0" max="0.5" step="0.01" value="0.05">
+                  <input type="number" id="num-clearance2" min="0" max="0.5" step="0.01" value="0.05" class="num-box">
+                </div>
+                <div class="param-hint">Эквидистантный зазор зацепления 2-го яруса</div>
+              </div>
+            </div>
+
+            <!-- Центровочные штифты сопряжения дисков (Dowel Pins) -->
+            <div class="param-group">
+              <div class="group-title">
+                <span>Штифты сопряжения дисков (Dowel Pins)</span>
+              </div>
+              <p class="section-desc">Позволяет напечатать 2 плоских диска отдельно на 3D-принтере и соединить их штифтами/винтами без поддержек.</p>
+
+              <div class="checkbox-row" style="margin-bottom: 12px;">
+                <label class="custom-checkbox">
+                  <input type="checkbox" id="chk-compound-dowels" checked>
+                  <span class="checkbox-box"></span>
+                  <span class="checkbox-label"><strong>Отверстия под центровочные штифты</strong></span>
+                </label>
+              </div>
+
+              <div id="compound-dowels-controls">
+                <div class="param-row">
+                  <div class="param-label">
+                    <label for="inp-dowel-d">Диаметр штифта (мм):</label>
+                    <span class="param-val" id="val-dowel-d">3.00</span>
+                  </div>
+                  <div class="param-control">
+                    <input type="range" id="inp-dowel-d" min="1.5" max="8" step="0.5" value="3.0">
+                    <input type="number" id="num-dowel-d" min="1.5" max="8" step="0.5" value="3.0" class="num-box">
+                  </div>
+                  <div class="param-hint">Под винты M3 (3.0 мм) или штифты DIN 7</div>
+                </div>
+
+                <div class="param-row">
+                  <div class="param-label">
+                    <label for="inp-dowel-r">Радиус расположения (мм):</label>
+                    <span class="param-val" id="val-dowel-r">16.00</span>
+                  </div>
+                  <div class="param-control">
+                    <input type="range" id="inp-dowel-r" min="5" max="60" step="0.5" value="16.0">
+                    <input type="number" id="num-dowel-r" min="5" max="60" step="0.5" value="16.0" class="num-box">
+                  </div>
+                </div>
+
+                <div class="form-group" style="margin-top: 10px;">
+                  <label for="sel-dowel-n" style="font-size: 0.8rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Количество штифтов:</label>
+                  <select id="sel-dowel-n" class="form-select full-width">
+                    <option value="3">3 штифта (равномерно через 120°)</option>
+                    <option value="4" selected>4 штифта (крест через 90°)</option>
+                    <option value="6">6 штифтов (усиленное соединение через 60°)</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Проверка стенок и посадки Compound -->
+            <div class="param-group">
+              <div class="group-title">
+                <span>Проверка прочности Compound</span>
+              </div>
+
+              <div id="compound-diag-card" class="status-card status-ok">
+                <div class="status-indicator"></div>
+                <div class="status-details">
+                  <div class="status-heading" id="compound-diag-title">Стенки диска: Надежно</div>
+                  <div class="status-sub" id="compound-diag-desc">Штифты и подшипник размещены безопасно.</div>
+                </div>
+              </div>
+
+              <div class="metric-grid-3">
+                <div class="metric-item">
+                  <span class="metric-name">Стенка Венца 1</span>
+                  <span class="metric-val" id="m-comp-wall1">16.2 мм</span>
+                  <span class="metric-sub">Лимит: ≥ 1.5 мм</span>
+                </div>
+                <div class="metric-item">
+                  <span class="metric-name">Стенка Венца 2</span>
+                  <span class="metric-val" id="m-comp-wall2">13.8 мм</span>
+                  <span class="metric-sub">Лимит: ≥ 1.5 мм</span>
+                </div>
+                <div class="metric-item">
+                  <span class="metric-name">Зазор штифтов</span>
+                  <span class="metric-val" id="m-comp-dowel-margin">4.0 мм</span>
+                  <span class="metric-sub">Внутри &gt; 1.0 мм</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Содержимое вкладки: Инженерный анализ -->
+        <div class="tab-content" id="tab-analysis">
+          <div class="param-group">
+            <div class="group-title">
+              <span>Критерии правильности зацепления</span>
+            </div>
+
+            <div id="status-card" class="status-card status-ok">
+              <div class="status-indicator"></div>
+              <div class="status-details">
+                <div class="status-heading" id="status-text">Геометрия корректна</div>
+                <div class="status-sub" id="status-desc">Поднутрения и самопересечений профиля нет.</div>
+              </div>
+            </div>
+
+            <div class="metric-grid">
+              <div class="metric-item">
+                <span class="metric-name">Коэфф. эксцентриситета (K₁)</span>
+                <span class="metric-val" id="m-k1">0.550</span>
+                <span class="metric-sub">Лимит: K₁ &lt; 1.00</span>
+              </div>
+              <div class="metric-item">
+                <span class="metric-name">Макс. эксцентриситет (E_max)</span>
+                <span class="metric-val" id="m-emax">2.72 мм</span>
+                <span class="metric-sub">Текущий: <span id="m-ecurr">1.50 мм</span></span>
+              </div>
+              <div class="metric-item">
+                <span class="metric-name">Мин. радиус венца (R_min)</span>
+                <span class="metric-val" id="m-rmin">18.4 мм</span>
+                <span class="metric-sub">Текущий: <span id="m-rcurr">30.0 мм</span></span>
+              </div>
+              <div class="metric-item">
+                <span class="metric-name">Макс. радиус ролика (Rr_max)</span>
+                <span class="metric-val" id="m-rrmax">7.4 мм</span>
+                <span class="metric-sub">Текущий: <span id="m-rrcurr">3.0 мм</span></span>
+              </div>
+            </div>
+
+            <div class="info-card">
+              <div class="info-title">Кинематическое передаточное отношение:</div>
+              <div class="info-value">U = -Z₁ = <span id="info-ratio-display">-10</span></div>
+              <div class="info-desc">Выходной вал вращается в обратную сторону относительно входного вала. За 10 оборотов эксцентрика выходной вал делает ровно 1 полный оборот.</div>
+            </div>
+          </div>
+
+          <!-- Группа: Контроль кривизны под сопло 3D-принтера / фрезу ЧПУ -->
+          <div class="param-group">
+            <div class="group-title" style="display: flex; justify-content: space-between; align-items: center;">
+              <span>Контроль кривизны (Сопло / Фреза)</span>
+              <label class="custom-checkbox" style="font-size: 0.72rem; text-transform: none; font-weight: 500;">
+                <input type="checkbox" id="chk-analysis-curvature">
+                <span class="checkbox-box" style="width: 14px; height: 14px;"></span>
+                <span class="checkbox-label" style="font-size: 0.74rem;">Тепловая карта</span>
+              </label>
+            </div>
+
+            <!-- Селектор инструмента -->
+            <div class="form-group" style="margin-bottom: 10px;">
+              <label for="sel-tool-type" style="font-size: 0.76rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Инструмент изготовления (сопло / фреза):</label>
+              <select id="sel-tool-type" class="form-select full-width">
+                <optgroup label="3D-печать (Диаметр сопла)">
+                  <option value="nozzle-0.2">Сопло 0.2 мм (r = 0.10 мм, Ultra Detail)</option>
+                  <option value="nozzle-0.4" selected>Сопло 0.4 мм (r = 0.20 мм, Стандарт)</option>
+                  <option value="nozzle-0.6">Сопло 0.6 мм (r = 0.30 мм, High Flow)</option>
+                  <option value="nozzle-0.8">Сопло 0.8 мм (r = 0.40 мм, Быстрая печать)</option>
+                  <option value="nozzle-1.0">Сопло 1.0 мм (r = 0.50 мм)</option>
+                </optgroup>
+                <optgroup label="Фрезеровка на ЧПУ (Концевая фреза)">
+                  <option value="mill-1.0">Фреза Ø 1.0 мм (r = 0.50 мм)</option>
+                  <option value="mill-1.5">Фреза Ø 1.5 мм (r = 0.75 мм)</option>
+                  <option value="mill-2.0">Фреза Ø 2.0 мм (r = 1.00 мм)</option>
+                  <option value="mill-3.175">Фреза Ø 3.175 мм / 1/8" (r = 1.59 мм)</option>
+                  <option value="mill-4.0">Фреза Ø 4.0 мм (r = 2.00 мм)</option>
+                  <option value="mill-6.0">Фреза Ø 6.0 мм (r = 3.00 мм)</option>
+                </optgroup>
+                <optgroup label="Ручной ввод">
+                  <option value="custom">Пользовательский диаметр инструмента</option>
+                </optgroup>
+              </select>
+            </div>
+
+            <!-- Числовой ввод для пользовательского диаметра -->
+            <div class="param-row" id="row-custom-tool" style="display: none; margin-bottom: 10px;">
+              <div class="param-label">
+                <label for="inp-tool-d">Диаметр инструмента D_tool (мм):</label>
+                <span class="param-val" id="val-tool-d">0.40</span>
+              </div>
+              <div class="param-control">
+                <input type="range" id="inp-tool-d" min="0.1" max="10.0" step="0.05" value="0.4">
+                <input type="number" id="num-tool-d" min="0.1" max="10.0" step="0.05" value="0.4" class="num-box">
+              </div>
+            </div>
+
+            <!-- Статус совместимости инструмента -->
+            <div id="curvature-status-card" class="status-card status-ok">
+              <div class="status-indicator"></div>
+              <div class="status-details">
+                <div class="status-heading" id="curvature-status-title">Геометрия совместима</div>
+                <div class="status-sub" id="curvature-status-desc">Инструмент свободно проходит во все впадины.</div>
+              </div>
+            </div>
+
+            <!-- Метрики кривизны -->
+            <div class="metric-grid">
+              <div class="metric-item">
+                <span class="metric-name">Мин. радиус впадины (ρ_min)</span>
+                <span class="metric-val" id="m-rho-concave">4.25 мм</span>
+                <span class="metric-sub">Лимит: &gt; r_tool (<span id="m-tool-radius">0.20 мм</span>)</span>
+              </div>
+              <div class="metric-item">
+                <span class="metric-name">Макс. сопло / фреза</span>
+                <span class="metric-val" id="m-tool-max">Ø 8.50 мм</span>
+                <span class="metric-sub">Предельный инструмент</span>
+              </div>
+              <div class="metric-item">
+                <span class="metric-name">Радиус вершины зуба</span>
+                <span class="metric-val" id="m-rho-convex">6.85 мм</span>
+                <span class="metric-sub">Выпуклая зона</span>
+              </div>
+              <div class="metric-item">
+                <span class="metric-name">Запас по геометрии</span>
+                <span class="metric-val" id="m-tool-safety">21.3x</span>
+                <span class="metric-sub">Коэфф. ρ_min / r_tool</span>
+              </div>
+            </div>
+
+            <!-- Рекомендации по оборудованию -->
+            <div class="info-card" style="margin-bottom: 0;">
+              <div class="info-title">Рекомендации по оборудованию:</div>
+              <div class="info-desc" style="font-size: 0.74rem;">
+                • <strong>3D-печать:</strong> Рекомендуемое сопло: <strong id="rec-nozzle-badge" style="color: var(--accent-cyan);">0.4 мм</strong><br>
+                • <strong>ЧПУ фрезеровка:</strong> Рекомендуемая фреза: <strong id="rec-endmill-badge" style="color: var(--accent-green);">4.0 мм</strong>
+              </div>
+            </div>
+          </div>
+
+          <!-- Группа: Силовой и прочностной анализ (Sensinger Stress & Load Sharing) -->
+          <div class="param-group">
+            <div class="group-title">
+              <span>Силы и контактные напряжения (Sensinger)</span>
+            </div>
+
+            <!-- Пресет двигателя -->
+            <div class="form-group" style="margin-bottom: 8px;">
+              <label for="sel-stress-motor-preset" style="font-size: 0.76rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Двигатель (источник момента):</label>
+              <select id="sel-stress-motor-preset" class="form-select full-width">
+                <option value="nema17-standard" selected>NEMA 17 (0.45 Н·м, 1000 об/мин)</option>
+                <option value="nema17-compact">NEMA 17 Компакт (0.28 Н·м, 1200 об/мин)</option>
+                <option value="nema17-high">NEMA 17 Усиленный (0.59 Н·м, 800 об/мин)</option>
+                <option value="nema23-standard">NEMA 23 (1.26 Н·м, 800 об/мин)</option>
+                <option value="nema23-high">NEMA 23 Высокомоментный (2.50 Н·м, 600 об/мин)</option>
+                <option value="nema34-high">NEMA 34 Промышленный (4.50 Н·м, 500 об/мин)</option>
+                <option value="custom">Пользовательский крутящий момент</option>
+              </select>
+            </div>
+
+            <!-- Крутящий момент на входе T_in -->
+            <div class="param-row">
+              <div class="param-label">
+                <label for="inp-motor-torque">Момент мотора T_вх (Н·м):</label>
+                <span class="param-val" id="val-motor-torque">0.45</span>
+              </div>
+              <div class="param-control">
+                <input type="range" id="inp-motor-torque" min="0.05" max="5.0" step="0.05" value="0.45">
+                <input type="number" id="num-motor-torque" min="0.05" max="20.0" step="0.05" value="0.45" class="num-box">
+              </div>
+            </div>
+
+            <!-- Толщина циклоидного диска b -->
+            <div class="param-row">
+              <div class="param-label">
+                <label for="inp-disc-thickness">Толщина диска b (мм):</label>
+                <span class="param-val" id="val-disc-thickness">10.0</span>
+              </div>
+              <div class="param-control">
+                <input type="range" id="inp-disc-thickness" min="3.0" max="30.0" step="0.5" value="10.0">
+                <input type="number" id="num-disc-thickness" min="1.0" max="100.0" step="0.5" value="10.0" class="num-box">
+              </div>
+              <div class="param-hint">Ширина венца зубьев, воспринимающая контактную силу</div>
+            </div>
+
+            <!-- Материал диска -->
+            <div class="form-group" style="margin-bottom: 10px;">
+              <label for="sel-disc-material" style="font-size: 0.76rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Материал циклоидного диска:</label>
+              <select id="sel-disc-material" class="form-select full-width">
+                <option value="pla" selected>PLA (E=3500 МПа, [σ]=45 МПа) — FDM стандарт</option>
+                <option value="petg">PETG (E=2100 МПа, [σ]=35 МПа) — Вязкий ударопрочный</option>
+                <option value="pacf">PA-CF Угленаполненный (E=4500 МПа, [σ]=65 МПа) — Топ для редукторов</option>
+                <option value="nylon">Nylon PA12 (E=1750 МПа, [σ]=48 МПа) — Износостойкий</option>
+                <option value="pom">POM / Delrin (E=2800 МПа, [σ]=60 МПа) — Минимальное трение</option>
+                <option value="steel">Сталь 40Х (E=210000 МПа, [σ]=350 МПа) — Металл / ЧПУ</option>
+                <option value="al6061">Алюминий Д16Т (E=70000 МПа, [σ]=180 МПа) — Легкий металл</option>
+              </select>
+            </div>
+
+            <!-- Карточка статуса прочности -->
+            <div id="stress-status-card" class="status-card status-ok">
+              <div class="status-indicator"></div>
+              <div class="status-details">
+                <div class="status-heading" id="stress-status-title">Прочность обеспечена</div>
+                <div class="status-sub" id="stress-status-desc">Контактные напряжения в пределах нормы.</div>
+              </div>
+            </div>
+
+            <!-- Сетка результатов расчёта -->
+            <div class="metric-grid">
+              <div class="metric-item">
+                <span class="metric-name">Выходной крутящий момент</span>
+                <span class="metric-val" id="m-tout">4.05 Н·м</span>
+                <span class="metric-sub">С учётом КПД η = 90%</span>
+              </div>
+              <div class="metric-item">
+                <span class="metric-name">Сила на ролик F_max</span>
+                <span class="metric-val" id="m-fmax-roller">49.1 Н</span>
+                <span class="metric-sub">Активно: <span id="m-active-rollers">6</span> роликов</span>
+              </div>
+              <div class="metric-item">
+                <span class="metric-name">Напряжение Герца (σ_H)</span>
+                <span class="metric-val" id="m-sigma-hertz">41.8 МПа</span>
+                <span class="metric-sub">Лимит: &lt; <span id="m-mat-limit">45.0 МПа</span></span>
+              </div>
+              <div class="metric-item">
+                <span class="metric-name">Коэфф. запаса (SF)</span>
+                <span class="metric-val" id="m-stress-sf">1.08x</span>
+                <span class="metric-sub">Ресурс: [σ] / σ_H</span>
+              </div>
+              <div class="metric-item">
+                <span class="metric-name">Нагрузка на палец (F_pin)</span>
+                <span class="metric-val" id="m-fpin">39.7 Н</span>
+                <span class="metric-sub">Изгиб: <span id="m-pin-bend">15.8 МПа</span></span>
+              </div>
+              <div class="metric-item">
+                <span class="metric-name">Теоретический люфт (Backlash)</span>
+                <span class="metric-val" id="m-backlash">22.9'</span>
+                <span class="metric-sub">~<span id="m-backlash-deg">0.38°</span> (зазор <span id="m-backlash-clearance">0.05 мм</span>)</span>
+              </div>
+            </div>
+
+            <div class="info-card" style="margin-bottom: 0;">
+              <div class="info-title">Особенности нагружения:</div>
+              <div class="info-desc" style="font-size: 0.74rem;">
+                В циклоидном редукторе в зацеплении одновременно находится ~50% роликов статора, распределяя контактные силы. Использование <strong>двух дисков в противофазе</strong> снижает контактные напряжения ещё в √2 раз (~1.41x) и удваивает несущую способность.
+              </div>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Центральная область холста и симуляции -->
+      <section class="viewport-area">
+        <!-- Панель управления отображением слоев и видовым экраном -->
+        <div class="viewport-toolbar">
+          <div class="tool-group">
+            <button id="btn-reset-view" class="tool-btn" title="Сбросить масштаб и центрировать">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+              Центр
+            </button>
+            <button id="btn-zoom-in" class="tool-btn" title="Приблизить">+</button>
+            <button id="btn-zoom-out" class="tool-btn" title="Отдалить">-</button>
+            <span class="zoom-level" id="zoom-text">100%</span>
+          </div>
+
+          <div class="layer-toggles">
+            <label class="layer-chip active" id="chip-cam1">
+              <input type="checkbox" id="chk-show-cam1" checked>
+              <span class="chip-dot" style="background:#00f2fe"></span>Диск 1
+            </label>
+            <label class="layer-chip active" id="chip-cam2">
+              <input type="checkbox" id="chk-show-cam2" checked>
+              <span class="chip-dot" style="background:#ff007f"></span>Диск 2
+            </label>
+            <label class="layer-chip active" id="chip-eccentric">
+              <input type="checkbox" id="chk-show-eccentric" checked>
+              <span class="chip-dot" style="background:#ec4899"></span>Эксцентрик
+            </label>
+            <label class="layer-chip active" id="chip-rollers">
+              <input type="checkbox" id="chk-show-rollers" checked>
+              <span class="chip-dot" style="background:#38ef7d"></span>Ролики статора
+            </label>
+            <label class="layer-chip active" id="chip-carrier">
+              <input type="checkbox" id="chk-show-carrier" checked>
+              <span class="chip-dot" style="background:#f59e0b"></span>Выходные пальцы
+            </label>
+            <label class="layer-chip active" id="chip-output-ring" style="display: none;">
+              <input type="checkbox" id="chk-show-output-ring" checked>
+              <span class="chip-dot" style="background:#f59e0b"></span>Кольцо выхода
+            </label>
+            <label class="layer-chip active" id="chip-dowels" style="display: none;">
+              <input type="checkbox" id="chk-show-dowels" checked>
+              <span class="chip-dot" style="background:#cbd5e1"></span>Штифты
+            </label>
+            <label class="layer-chip" id="chip-pitch">
+              <input type="checkbox" id="chk-show-pitch">
+              <span class="chip-dot" style="background:#94a3b8"></span>Оси и базы
+            </label>
+            <label class="layer-chip" id="chip-curvature" title="Тепловая карта кривизны и проверка сопла/фрезы">
+              <input type="checkbox" id="chk-show-curvature">
+              <span class="chip-dot" style="background:#22c55e"></span>Кривизна / Сопло
+            </label>
+          </div>
+        </div>
+
+        <!-- Контейнер холста (Canvas) -->
+        <div class="canvas-container" id="canvas-container">
+          <canvas id="cycloid-canvas"></canvas>
+          <div class="canvas-hint">Перетаскивание: ЛКМ • Масштаб: Колесико мыши</div>
+        </div>
+
+        <!-- Нижняя панель кинематической симуляции -->
+        <div class="simulation-bar">
+          <div class="sim-controls">
+            <button id="btn-play-pause" class="btn-sim-play" title="Запустить / Остановить вращение">
+              <svg id="icon-play" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              <svg id="icon-pause" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style="display:none"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+              <span id="play-pause-text">Старт симуляции</span>
+            </button>
+
+            <button id="btn-step-fwd" class="tool-btn" title="Шаг вперёд на 5°">
+              +5°
+            </button>
+            <button id="btn-reset-angle" class="tool-btn" title="Сбросить угол в 0°">
+              0°
+            </button>
+          </div>
+
+          <div class="sim-slider-group">
+            <label for="inp-crank-angle">Угол эксцентрика (θ_вх): <span id="crank-angle-text">0.0°</span></label>
+            <input type="range" id="inp-crank-angle" min="0" max="360" step="0.5" value="0">
+          </div>
+
+          <div class="sim-speed-group">
+            <label for="inp-speed">Скорость: <span id="speed-text">1.0x</span></label>
+            <input type="range" id="inp-speed" min="0.1" max="4.0" step="0.1" value="1.0">
+          </div>
+
+          <div class="sim-stats">
+            <div class="stat-bubble">
+              <span class="stat-lbl">Выходной вал:</span>
+              <span class="stat-val" id="output-angle-text">0.0°</span>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Модальное окно экспорта DXF с параметрами сборки и центрирования -->
+  <div class="modal-backdrop" id="modal-dxf" style="display: none;">
+    <div class="modal-card modal-card-wide">
+      <div class="modal-header">
+        <h3>Параметры экспорта DXF (AutoCAD / Fusion 360)</h3>
+        <button class="modal-close" id="btn-close-dxf-modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-desc">Выберите режим выгрузки чертежа для САПР-сборки или производства:</p>
+        
+        <!-- Выбор режима экспорта -->
+        <div class="export-mode-selector">
+          <label class="mode-card active" id="label-mode-assembly">
+            <input type="radio" name="dxf-mode" id="mode-assembly" value="assembly" checked>
+            <div class="mode-card-header">
+              <span class="mode-title">Сборка в зацеплении (CAD / Fusion 360)</span>
+              <span class="badge-recommended">Рекомендуется</span>
+            </div>
+            <div class="mode-desc">Статор в (0,0), Диск 1 смещен на +e, Диск 2 на -e. Зазор ровно 0.000 мм, зубья идеально входят в зацепление с роликами без нахлеста.</div>
+          </label>
+
+          <label class="mode-card" id="label-mode-disc">
+            <input type="radio" name="dxf-mode" id="mode-disc" value="disc_only">
+            <div class="mode-card-header">
+              <span class="mode-title">Только диск (для 3D-печати / ЧПУ)</span>
+            </div>
+            <div class="mode-desc">Диск 1 центрирован строго в (0,0) вокруг своей оси вращения. Ролики статора исключены — чистая геометрия для слайсера или CAM.</div>
+          </label>
+
+          <label class="mode-card" id="label-mode-sheet">
+            <input type="radio" name="dxf-mode" id="mode-sheet" value="sheet_layout">
+            <div class="mode-card-header">
+              <span class="mode-title">Раскладка всех деталей на плоскости</span>
+            </div>
+            <div class="mode-desc">Диск 1, Диск 2, ролики статора, эксцентрик и пальцы разнесены рядом без взаимных наложений (для лазерной резки / ЧПУ).</div>
+          </label>
+        </div>
+
+        <!-- Опции слоев чертежа -->
+        <div class="export-options-box" id="assembly-layers-options">
+          <div class="options-box-title">Включаемые компоненты и слои:</div>
+          <div class="options-grid">
+            <label class="custom-checkbox">
+              <input type="checkbox" id="dxf-inc-disc1" checked>
+              <span class="checkbox-box"></span>
+              <span class="checkbox-label">Диск 1 (CAM_DISC_1)</span>
+            </label>
+
+            <label class="custom-checkbox">
+              <input type="checkbox" id="dxf-inc-disc2" checked>
+              <span class="checkbox-box"></span>
+              <span class="checkbox-label">Диск 2 (противофаза)</span>
+            </label>
+
+            <label class="custom-checkbox">
+              <input type="checkbox" id="dxf-inc-stator" checked>
+              <span class="checkbox-box"></span>
+              <span class="checkbox-label">Ролики статора</span>
+            </label>
+
+            <label class="custom-checkbox">
+              <input type="checkbox" id="dxf-inc-bore" checked>
+              <span class="checkbox-box"></span>
+              <span class="checkbox-label">Отверстия подшипников</span>
+            </label>
+
+            <label class="custom-checkbox">
+              <input type="checkbox" id="dxf-inc-carrier" checked>
+              <span class="checkbox-box"></span>
+              <span class="checkbox-label">Отверстия под пальцы</span>
+            </label>
+
+            <label class="custom-checkbox">
+              <input type="checkbox" id="dxf-inc-carrier-pins" checked>
+              <span class="checkbox-box"></span>
+              <span class="checkbox-label">Пальцы водила в сборе</span>
+            </label>
+
+            <label class="custom-checkbox">
+              <input type="checkbox" id="dxf-inc-eccentric" checked>
+              <span class="checkbox-box"></span>
+              <span class="checkbox-label">Эксцентрик на вал</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Формат кривой контура зубьев (Пункт 4: Bi-Arc / Сплайн / Полилиния) -->
+        <div class="export-options-box" style="margin-top: 14px;">
+          <div class="options-box-title">Формат геометрии зубьев (Оптимизация CAD / ЧПУ):</div>
+          <div class="curve-mode-selector">
+            <label class="curve-card active" id="label-curve-biarc">
+              <input type="radio" name="dxf-curve-type" id="curve-biarc" value="biarc" checked>
+              <div class="curve-card-header">
+                <span class="mode-title">Гладкие дуги Bi-Arc (LWPOLYLINE)</span>
+                <span class="badge-recommended">Идеально для Fusion 360 / ЧПУ</span>
+              </div>
+              <div class="mode-desc">
+                Сжатие в 20 раз (всего ~60 дуг вместо 1200 микро-отрезков с точностью &le; 0.005 мм). Во Fusion 360 выдавливается гладкими поверхностями без фасеток; на ЧПУ/лазере режется командами G02/G03 без вибраций.
+              </div>
+            </label>
+
+            <label class="curve-card" id="label-curve-spline">
+              <input type="radio" name="dxf-curve-type" id="curve-spline" value="spline">
+              <div class="curve-card-header">
+                <span class="mode-title">Математический сплайн (DXF SPLINE)</span>
+              </div>
+              <div class="mode-desc">
+                Единая аналитическая B-сплайн NURBS кривая 3-го порядка через опорные точки (Fit Points). Минимальный размер файла.
+              </div>
+            </label>
+
+            <label class="curve-card" id="label-curve-polyline">
+              <input type="radio" name="dxf-curve-type" id="curve-polyline" value="polyline">
+              <div class="curve-card-header">
+                <span class="mode-title">Дискретная полилиния (1200 отрезков)</span>
+              </div>
+              <div class="mode-desc">
+                Классический экспорт микро-сегментами (AutoCAD R12 POLYLINE). Большой вес файла, фасеточные грани при 3D-выдавливании.
+              </div>
+            </label>
+          </div>
+
+          <!-- Настройка допуска для Bi-Arc -->
+          <div class="biarc-tolerance-row" id="biarc-tolerance-row" style="margin-top: 10px; display: flex; align-items: center; justify-content: space-between; font-size: 0.78rem; color: var(--text-muted);">
+            <span>Допустимое отклонение дуг (Tolerance):</span>
+            <select id="dxf-biarc-tol" class="form-input" style="width: 140px; padding: 4px 8px; font-size: 0.75rem;">
+              <option value="0.002">0.002 мм (Ultra)</option>
+              <option value="0.005" selected>0.005 мм (Optimal)</option>
+              <option value="0.010">0.010 мм (Fast)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="btn-cancel-dxf">Отмена</button>
+        <button class="btn btn-primary" id="btn-confirm-dxf-download">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Скачать DXF файл
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Модальное окно сохранения пользовательского пресета -->
+  <div class="modal-backdrop" id="modal-save-preset" style="display: none;">
+    <div class="modal-card" style="width: 380px;">
+      <div class="modal-header">
+        <h3>Сохранить пресет в браузере</h3>
+        <button class="modal-close" id="btn-close-save-preset-modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-desc">Введите понятное название для быстрого доступа к конфигурации:</p>
+        <div class="form-group">
+          <label for="inp-custom-preset-name">Название проекта / конфигурации:</label>
+          <input type="text" id="inp-custom-preset-name" class="form-input" placeholder="Например: Мой привод 11:1 NEMA17" style="width:100%; margin-top:6px;">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="btn-cancel-save-preset">Отмена</button>
+        <button class="btn btn-primary" id="btn-confirm-save-preset">Сохранить</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Drag and Drop Overlay для загрузки JSON -->
+  <div class="drag-drop-overlay" id="drag-drop-overlay" style="display: none;">
+    <div class="drag-drop-box">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#00f2fe" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      <h3>Отпустите JSON файл для загрузки</h3>
+      <p>Конфигурация редуктора будет мгновенно применена</p>
+    </div>
+  </div>
+
+  <!-- Контейнер всплывающих уведомлений (Toast) -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Скрипты приложения -->
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
