@@ -151,19 +151,19 @@ class CycloidApp {
       camBore: { range: document.getElementById("inp-cam-bore"), num: document.getElementById("num-cam-bore"), val: document.getElementById("val-cam-bore") },
       steps: { range: document.getElementById("inp-steps"), num: document.getElementById("num-steps"), val: document.getElementById("val-steps") },
 
-      // Входной узел
+      // Вал и эксцентрик (Кулачок)
       motorPreset: document.getElementById("sel-motor-preset"),
       shaftD: { range: document.getElementById("inp-shaft-d"), num: document.getElementById("num-shaft-d"), val: document.getElementById("val-shaft-d") },
       chkDcut: document.getElementById("chk-shaft-dcut"),
       bearingPreset: document.getElementById("sel-bearing-preset"),
       bearingId: { range: document.getElementById("inp-bearing-id"), num: document.getElementById("num-bearing-id"), val: document.getElementById("val-bearing-id") },
       bearingOd: { range: document.getElementById("inp-bearing-od"), num: document.getElementById("num-bearing-od"), val: document.getElementById("val-bearing-od") },
+      dualDisc: document.getElementById("chk-dual-disc"),
 
       // Выходной вал
       carrierN: { range: document.getElementById("inp-carrier-n"), num: document.getElementById("num-carrier-n"), val: document.getElementById("val-carrier-n") },
       carrierR: { range: document.getElementById("inp-carrier-r"), num: document.getElementById("num-carrier-r"), val: document.getElementById("val-carrier-r") },
       carrierPinD: { range: document.getElementById("inp-carrier-pin-d"), num: document.getElementById("num-carrier-pin-d"), val: document.getElementById("val-carrier-pin-d") },
-      dualDisc: document.getElementById("chk-dual-disc"),
 
       // Подшипники выходных пальцев
       chkPinBearing: document.getElementById("chk-pin-bearing"),
