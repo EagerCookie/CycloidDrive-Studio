@@ -8,6 +8,7 @@ import { SvgExporter } from "./svgExporter.js";
 import { ProfileRelief } from "./profileRelief.js";
 import { CurvatureInspector } from "./curvatureInspector.js";
 import { StressCalculator } from "./stressCalculator.js";
+import { ParameterGuide } from "./parameterGuide.js";
 
 // Главный класс приложения
 class CycloidApp {
@@ -130,6 +131,7 @@ class CycloidApp {
     this.initDOM();
     this.initPresets();
     this.loadCustomPresets();
+    this.parameterGuide = new ParameterGuide();
     this.setupEvents();
     this.updateCalculations();
     this.startAnimationLoop();
