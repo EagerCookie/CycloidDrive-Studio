@@ -1288,18 +1288,18 @@ input[type="range"]::-webkit-slider-thumb:hover {
 .help-popover {
   position: fixed;
   z-index: 10000;
-  width: 380px;
-  max-width: calc(100vw - 32px);
-  max-height: calc(100vh - 40px);
+  width: 370px;
+  max-width: calc(100vw - 24px);
+  max-height: calc(100vh - 20px);
   background: rgba(13, 20, 36, 0.96);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
   border: 1px solid rgba(0, 242, 254, 0.28);
-  border-radius: 14px;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.65), 0 0 35px rgba(0, 242, 254, 0.12);
+  border-radius: 12px;
+  box-shadow: 0 16px 45px rgba(0, 0, 0, 0.7), 0 0 35px rgba(0, 242, 254, 0.12);
   color: var(--text-main);
   animation: helpFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  display: flex;
+  display: flex !important;
   flex-direction: column;
   overflow: hidden;
 }
@@ -1316,10 +1316,11 @@ input[type="range"]::-webkit-slider-thumb:hover {
 }
 
 .help-popover-header {
+  flex-shrink: 0;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 14px;
+  padding: 10px 14px;
   background: rgba(255, 255, 255, 0.03);
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
@@ -1331,7 +1332,7 @@ input[type="range"]::-webkit-slider-thumb:hover {
 }
 
 .help-header-icon {
-  font-size: 1.2rem;
+  font-size: 1.15rem;
   line-height: 1;
 }
 
@@ -1342,7 +1343,7 @@ input[type="range"]::-webkit-slider-thumb:hover {
 }
 
 .help-title {
-  font-size: 0.92rem;
+  font-size: 0.88rem;
   font-weight: 700;
   color: #fff;
   margin: 0;
@@ -1350,7 +1351,7 @@ input[type="range"]::-webkit-slider-thumb:hover {
 }
 
 .help-badge {
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   font-family: var(--font-mono);
   color: var(--accent-cyan);
   background: rgba(0, 242, 254, 0.12);
@@ -1364,7 +1365,7 @@ input[type="range"]::-webkit-slider-thumb:hover {
   background: none;
   border: none;
   color: var(--text-muted);
-  font-size: 1.4rem;
+  font-size: 1.3rem;
   cursor: pointer;
   padding: 0 4px;
   line-height: 1;
@@ -1376,14 +1377,39 @@ input[type="range"]::-webkit-slider-thumb:hover {
 }
 
 .help-popover-body {
-  padding: 12px 14px;
+  flex: 1 1 auto;
+  min-height: 0;
   overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 10px 14px 14px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 9px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 242, 254, 0.4) rgba(0, 0, 0, 0.2);
+}
+
+.help-popover-body::-webkit-scrollbar {
+  width: 5px;
+}
+
+.help-popover-body::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+.help-popover-body::-webkit-scrollbar-thumb {
+  background: rgba(0, 242, 254, 0.35);
+  border-radius: 4px;
+}
+
+.help-popover-body::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-cyan);
 }
 
 .help-diagram-container {
+  flex-shrink: 0;
+  max-height: 115px;
   border-radius: 8px;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -1393,6 +1419,8 @@ input[type="range"]::-webkit-slider-thumb:hover {
 
 .help-diagram-container svg {
   display: block;
+  max-height: 115px;
+  width: 100%;
 }
 
 .help-section {

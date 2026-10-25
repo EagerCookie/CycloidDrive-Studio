@@ -15,14 +15,14 @@ export const GUIDE_DATA = {
     impactLow: "Крупные, максимально прочные зубья, легкая FDM-печать соплом 0.4–0.6 мм без наплывов. Но передаточное отношение невелико.",
     proTip: "Для первой печати и стандартных FDM-принтеров идеальный диапазон Z₁ — от 10 до 15. Профиль получается крупным, плавным, без риска перелива пластика во впадинах.",
     svg: `
-      <svg viewBox="0 0 320 140" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+      <svg viewBox="0 10 320 120" width="100%" height="105" xmlns="http://www.w3.org/2000/svg">
         <defs>
           <radialGradient id="g-center" cx="50%" cy="50%" r="50%">
             <stop offset="0%" stop-color="#00f2fe" stop-opacity="0.3"/>
             <stop offset="100%" stop-color="#00f2fe" stop-opacity="0"/>
           </radialGradient>
         </defs>
-        <rect width="320" height="140" fill="#090e18" rx="8"/>
+        <rect y="10" width="320" height="120" fill="#090e18" rx="8"/>
         <!-- Оси координат -->
         <line x1="160" y1="10" x2="160" y2="130" stroke="rgba(255,255,255,0.08)" stroke-dasharray="3,3"/>
         <line x1="20" y1="70" x2="300" y2="70" stroke="rgba(255,255,255,0.08)" stroke-dasharray="3,3"/>
@@ -64,8 +64,8 @@ export const GUIDE_DATA = {
     impactLow: "Компактный внешний габарит, но контактные нагрузки на зубья резко возрастают. Отверстия под пальцы водила могут прорезать впадины диска насквозь.",
     proTip: "Стремитесь к соотношению R / e ≥ 15...25. Это гарантирует отсутствие петель трохоиды, отличную плавность зацепления и надежные перемычки между отверстиями пальцев водила.",
     svg: `
-      <svg viewBox="0 0 320 140" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-        <rect width="320" height="140" fill="#090e18" rx="8"/>
+      <svg viewBox="0 10 320 120" width="100%" height="105" xmlns="http://www.w3.org/2000/svg">
+        <rect y="10" width="320" height="120" fill="#090e18" rx="8"/>
         <!-- Окружность R -->
         <circle cx="160" cy="70" r="50" fill="none" stroke="#00f2fe" stroke-width="1.8" stroke-dasharray="5,4"/>
         <!-- Оси -->
@@ -108,8 +108,8 @@ export const GUIDE_DATA = {
     impactLow: "Вершины зубьев диска массивнее и толще, но контактные напряжения растут («точечный укол» ролика в пластик), а тонкие оси роликов могут согнуться.",
     proTip: "Выбирайте Rr под реальные покупные детали: подшипники MR63 (Rr=1.5 мм), MR84 (Rr=2.0 мм), 688 (Rr=4.0 мм) или калёные штифты DIN 6325 диаметром 3, 4 или 5 мм.",
     svg: `
-      <svg viewBox="0 0 320 140" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-        <rect width="320" height="140" fill="#090e18" rx="8"/>
+      <svg viewBox="0 10 320 120" width="100%" height="105" xmlns="http://www.w3.org/2000/svg">
+        <rect y="10" width="320" height="120" fill="#090e18" rx="8"/>
         <!-- Зуб циклоидного диска (cyan) -->
         <path d="M 60 120 C 100 115 115 90 120 70 C 125 50 145 25 180 25 C 215 25 235 50 240 70 C 245 90 260 115 300 120"
               fill="rgba(0, 242, 254, 0.12)" stroke="#00f2fe" stroke-width="2.5"/>
@@ -144,8 +144,8 @@ export const GUIDE_DATA = {
     impactLow: "Минимум вибраций, прочный толстостенный кулачок. Минусы: зубья становятся низкими и пологими, риск проскока при упругой деформации пластикового корпуса.",
     proTip: "Держите e в диапазоне 1.0–1.5 мм для редукторов с Z₁=10–15. Всегда следите за индикатором «Толщина стенки кулачка» во вкладке «Вал и эксцентрик» (t_min ≥ 1.5 мм).",
     svg: `
-      <svg viewBox="0 0 320 140" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-        <rect width="320" height="140" fill="#090e18" rx="8"/>
+      <svg viewBox="0 10 320 120" width="100%" height="105" xmlns="http://www.w3.org/2000/svg">
+        <rect y="10" width="320" height="120" fill="#090e18" rx="8"/>
         <!-- Центральная ось вала мотора C0 (0,0) -->
         <circle cx="130" cy="70" r="28" fill="#111827" stroke="#4b5563" stroke-width="1.5"/>
         <line x1="130" y1="30" x2="130" y2="110" stroke="#fff" stroke-width="1.2" stroke-dasharray="3,3"/>
@@ -324,34 +324,39 @@ export class ParameterGuide {
     document.getElementById("help-popover-impact-low").textContent = " " + data.impactLow;
     document.getElementById("help-popover-protip").textContent = data.proTip;
 
-    this.popover.style.display = "block";
+    this.popover.style.display = "flex";
     this.positionPopover(btnElement);
   }
 
   positionPopover(btn) {
     const btnRect = btn.getBoundingClientRect();
+    const padding = 10;
+    const vh = window.innerHeight;
+    const vw = window.innerWidth;
+
+    // Гарантируем, что максимальная высота карточки строго ограничена экраном
+    this.popover.style.maxHeight = `${vh - 2 * padding}px`;
+
     const popoverRect = this.popover.getBoundingClientRect();
-    const padding = 12;
 
-    // Пытаемся разместить справа от кнопки (над холстом)
+    // Горизонтальное позиционирование (справа от кнопки/сайдбара)
     let left = btnRect.right + padding;
-    let top = btnRect.top - 20;
-
-    // Если справа не помещается, проверяем слева или ниже
-    if (left + popoverRect.width > window.innerWidth - padding) {
-      // Слева
+    if (left + popoverRect.width > vw - padding) {
       left = btnRect.left - popoverRect.width - padding;
     }
-
     if (left < padding) {
-      // Центрируем по ширине экрана
-      left = Math.max(padding, (window.innerWidth - popoverRect.width) / 2);
+      left = Math.max(padding, (vw - popoverRect.width) / 2);
     }
 
-    // Проверяем вертикальные границы экрана
-    if (top + popoverRect.height > window.innerHeight - padding) {
-      top = window.innerHeight - popoverRect.height - padding;
+    // Вертикальное позиционирование:
+    // Пытаемся начать карточку чуть выше кнопки
+    let top = btnRect.top - 8;
+
+    // Если карточка выходит за нижний край экрана, аккуратно сдвигаем вверх
+    if (top + popoverRect.height > vh - padding) {
+      top = vh - popoverRect.height - padding;
     }
+    // Если карточка выходит за верхний край экрана, прижимаем к верхнему отступу
     if (top < padding) {
       top = padding;
     }
