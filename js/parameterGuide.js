@@ -267,7 +267,7 @@ export class ParameterGuide {
         e.preventDefault();
         e.stopPropagation();
         const paramKey = btn.getAttribute("data-help");
-        if (this.currentKey === paramKey && this.popover.style.display !== "none") {
+        if (this.currentKey === paramKey && this.isOpen()) {
           this.close();
         } else {
           this.open(paramKey, btn);
@@ -277,31 +277,47 @@ export class ParameterGuide {
 
       // Клик по кнопке закрытия
       if (e.target.closest("#help-popover-close")) {
+        e.preventDefault();
+        e.stopPropagation();
         this.close();
         return;
       }
 
       // Клик вне карточки закрывает ее
-      if (this.popover && this.popover.style.display !== "none") {
+      if (this.isOpen()) {
         if (!this.popover.contains(e.target)) {
           this.close();
         }
       }
     });
 
+    // Прямой обработчик клика на крестик
+    const closeBtn = this.popover.querySelector("#help-popover-close");
+    if (closeBtn) {
+      closeBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        this.close();
+      });
+    }
+
     // Закрытие по клавише Escape
     document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && this.popover && this.popover.style.display !== "none") {
+      if (e.key === "Escape" && this.isOpen()) {
         this.close();
       }
     });
 
     // Корректировка позиции при ресайзе окна
     window.addEventListener("resize", () => {
-      if (this.popover && this.popover.style.display !== "none" && this.activeBtn) {
+      if (this.isOpen() && this.activeBtn) {
         this.positionPopover(this.activeBtn);
       }
     });
+  }
+
+  isOpen() {
+    return this.popover && this.popover.classList.contains("visible");
   }
 
   open(paramKey, btnElement) {
@@ -324,7 +340,7 @@ export class ParameterGuide {
     document.getElementById("help-popover-impact-low").textContent = " " + data.impactLow;
     document.getElementById("help-popover-protip").textContent = data.proTip;
 
-    this.popover.style.display = "flex";
+    this.popover.classList.add("visible");
     this.positionPopover(btnElement);
   }
 
@@ -367,7 +383,7 @@ export class ParameterGuide {
 
   close() {
     if (this.popover) {
-      this.popover.style.display = "none";
+      this.popover.classList.remove("visible");
     }
     if (this.activeBtn) {
       this.activeBtn.classList.remove("active");
